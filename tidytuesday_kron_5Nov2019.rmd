@@ -1,0 +1,55 @@
+---
+title: "Tidy_Tuesday_Nov5"
+author: "Nick Kron"
+date: "11/5/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##load packages
+```{r}
+
+library(tibble)
+library(tidyr)
+library(ggplot2)
+library(dplyr)
+
+```
+
+```{r}
+
+commute_mode <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-11-05/commute.csv")
+
+```
+
+```{r}
+head(commute_mode)
+
+unique(commute_mode$city)
+unique(commute_mode$state)
+
+```
+
+```{r}
+
+commute_mode <- commute_mode %>% 
+  mutate(state_fixed = ifelse(state == "Ca", "California", state))
+
+commute_mode %>%
+  group_by(city_size, mode, state_fixed) %>% 
+  summarise(sum = sum(n)) %>%
+  inner_join(commute_mode %>%
+               group_by(city_size, state_fixed) %>% 
+                          summarize(total = sum(n))
+                        ) %>%
+  mutate(prop = sum/total) %>%
+  ggplot(data = ., aes (x = city_size, y = prop, fill = mode)) + geom_bar(stat = "identity") + facet_wrap(facets = "state_fixed")
+
+```
+
+
+
+
