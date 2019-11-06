@@ -1,0 +1,81 @@
+---
+title: "Bike Commuting Tidy Tuesday"
+author: "Mike Connelly"
+date: "11/5/2019"
+output: html_document
+---
+```{r}
+library(tidyverse)
+theme_set(theme_bw())
+```
+```{r read data}
+commute <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-11-05/commute.csv")
+head(commute)
+summary(commute)
+```
+```{r clean data}
+commute_clean <- commute %>%
+  filter(!is.na(state_region))
+```
+```{r clean cities}
+city_split <- str_split(str_replace(commute_clean$city, " \\(balance\\)", ""), " ")
+commute_clean$city_type <- sapply(city_split, function(x){rev(x)[1]})
+commute_clean$city <- sapply(city_split, function(x){paste(x[1:(length(x)-1)], collapse = ' ')})
+commute_clean <- commute_clean[,c(1,10,2:9)]
+```
+```{r}
+gcom <- ggplot(commute_clean, (aes(state, n))) 
+gcom +
+  geom_bar(stat = "identity") +
+  facet_grid(~state_region, scales = "free") +
+  theme(axis.text.x = element_text(angle = 90))
+```
+```{r florida bikes}
+commute_fl_bike <- commute_clean %>%
+  filter(mode == "Bike") %>%
+  filter(state == "Florida") %>% 
+  group_by(state) %>% 
+  top_n(n = 30, wt = n) %>%
+  arrange(percent, .by_group = TRUE)
+city_levels_bike <- commute_fl_bike$city
+commute_fl_bike$city <- factor(commute_fl_bike$city, levels = city_levels_bike, ordered = TRUE)
+```
+```{r ggplot}
+gcomf <- ggplot(commute_fl_bike, aes(x = city, y = percent))
+gcomf + 
+  geom_point(aes(size = n, color = city_size)) +
+  #facet_wrap(~ state) +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 0))
+```
+```{r FL NJ bikes}
+commute_fl_nj_bike <- commute_clean %>%
+  filter(mode == "Bike") %>%
+  filter(state == "Florida" | state == "New Jersey") %>% 
+  group_by(state) %>% 
+  top_n(n = 15, wt = n) %>%
+  arrange(percent, .by_group = TRUE)
+city_levels_bike <- commute_fl_nj_bike$city
+commute_fl_nj_bike$city <- factor(commute_fl_nj_bike$city, levels = city_levels_bike, ordered = TRUE)
+```
+```{r ggplot}
+png("./bikecommutes_NJ-FL.png", height = 480, width = 720, units = "px")
+gcomf <- ggplot(commute_fl_nj_bike, aes(x = city, y = percent))
+gcomf + 
+  geom_point(aes(size = n, color = city_size)) +
+  facet_grid(state ~ ., scales = "free") +
+  coord_flip() +
+  labs(title = "FL vs. NJ Bike Commutes in Cities",
+       subtitle = "Percent of bike commuters in cities with most bike commuters",
+       y = "City",
+       x = "Percent of Commuters that Bike") +
+  theme(axis.text.x = element_text(angle = 0, size = 16),
+        axis.title.x = element_text(size = 18),
+        axis.text.y = element_text(size = 14),
+        axis.title.y = element_text(size = 18),
+        plot.title = element_text(size = 24),
+        plot.subtitle = element_text(size = 12),
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16),
+        strip.text = element_text(size = 18)) 
+```
