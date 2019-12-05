@@ -1,0 +1,103 @@
+---
+title: "NYC Squirrels Tidy Tuesday"
+author: "Mike Connelly"
+date: "10/29/2019"
+output: html_document
+---
+```{r}
+library(tidyverse)
+```
+
+```{r}
+nyc_squirrels <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-29/nyc_squirrels.csv")
+```
+```{r}
+nyc_sq <- select(nyc_squirrels, lat, long, unique_squirrel_id, hectare, shift, date, hectare_squirrel_number, age, primary_fur_color, location, running, chasing, climbing, eating, foraging, kuks, quaas, moans, tail_flags, tail_twitches)
+```
+
+```{r}
+nyc_sq_clean <- nyc_sq %>% 
+  filter(!is.na(primary_fur_color)) %>%
+  filter(!is.na(shift)) %>%
+  filter(!is.na(age)) %>%
+  filter(age != "?") %>%
+  filter(!is.na(location))
+```
+```{r}
+nyc_ground <- nyc_sq_clean %>% filter(location == "Ground Plane")
+nyc_above <- nyc_sq_clean %>% filter(location == "Above Ground")
+```
+
+## Barplot of age distribution at different locations at ground level or above
+```{r}
+age_ground <- data.frame(table(nyc_ground$age))
+age_ground$location <- rep("Ground Plane", 2)
+age_above <- data.frame(table(nyc_above$age))
+age_above$location <- rep("Above Ground", 2)
+age_zone <- rbind(age_ground, age_above) %>% filter(Var1=="Adult" | Var1=="Juvenile")
+colnames(age_zone) <- c("age", "Freq", "location")
+```
+```{r}
+png("./squirrels.png", height = 480, width = 720, units = "px")
+ggplot(age_zone, aes(age, Freq)) + geom_bar(stat = "identity", aes(fill = age)) + facet_wrap(~location)
+```
+
+## Further exploration
+```{r}
+dplyr::count(nyc_sq, running)
+dplyr::count(nyc_sq, chasing)
+dplyr::count(nyc_sq, climbing)
+dplyr::count(nyc_sq, eating)
+dplyr::count(nyc_sq, foraging)
+dplyr::count(nyc_sq, kuks)
+dplyr::count(nyc_sq, quaas)
+dplyr::count(nyc_sq, moans)
+dplyr::count(nyc_sq, tail_flags)
+dplyr::count(nyc_sq, tail_twitches)
+```
+
+```{r}
+ggplot(nyc_sq_clean, aes(long, lat)) + geom_point() + facet_wrap(~shift)
+```
+
+```{r}
+sum_nyc_sq <- nyc_sq_clean %>% summarise(
+    Running=sum(running, na.rm=TRUE),
+    Chasing=sum(chasing, na.rm=TRUE),
+    Climbing=sum(climbing, na.rm=TRUE),
+    Eating=sum(eating, na.rm=TRUE),
+    Foraging=sum(foraging, na.rm=TRUE)
+)
+```
+
+```{r}
+sum_nyc_above <- nyc_above %>% summarise(
+    Kuks=sum(kuks, na.rm=TRUE),
+    Quaas=sum(quaas, na.rm=TRUE),
+    Moans=sum(moans, na.rm=TRUE),
+    Tail_Flags=sum(tail_flags, na.rm=TRUE),
+    Tail_Twitches=sum(tail_twitches, na.rm=TRUE)
+)
+```
+```{r}
+sum_nyc_ground <- nyc_ground %>% summarise(
+    Kuks=sum(kuks, na.rm=TRUE),
+    Quaas=sum(quaas, na.rm=TRUE),
+    Moans=sum(moans, na.rm=TRUE),
+    Tail_Flags=sum(tail_flags, na.rm=TRUE),
+    Tail_Twitches=sum(tail_twitches, na.rm=TRUE)
+)
+```
+
+```{r}
+sum_nyc <- rbind(sum_nyc_above, sum_nyc_ground)
+sum_nyc$location <- c("Above Ground", "Ground Plane")
+```
+```{r}
+ggplot(sum_nyc, aes(location, Kuks)) + geom_bar(stat = "identity")
+```
+
+```{r}
+longer_nyc <- pivot_longer(sum_nyc, )
+```
+
