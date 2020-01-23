@@ -1,0 +1,48 @@
+---
+title: "2020-01-21_TidyTuesday_Nick_Kron"
+author: "Nick Kron"
+date: "1/23/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, load packages}
+
+library(tidyr)
+library(ggplot2)
+library(dplyr)
+
+```
+
+
+
+```{r, get data}
+
+# Get the Data
+
+spotify_songs <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv')
+
+head(spotify_songs)
+
+```
+
+```{r}
+
+spotify_songs %>% 
+  dplyr::arrange(desc(track_popularity)) %>% 
+  dplyr::distinct(., track_id , .keep_all = TRUE) %>%
+  filter(track_popularity > quantile(spotify_songs$track_popularity, 0.9)) %>%
+  group_by(playlist_genre) %>%
+  summarise(n = n()) %>%
+  ggplot(data =., aes(x = playlist_genre, y = n )) + geom_bar(stat = "identity")
+
+
+spotify_songs %>%
+  ggplot(data =., aes(x = playlist_genre, y = energy)) + geom_boxplot()
+  
+```
+
+

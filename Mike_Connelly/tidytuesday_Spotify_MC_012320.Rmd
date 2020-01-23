@@ -1,0 +1,54 @@
+---
+title: "tidytuesday_Spotify_MC_012320"
+author: "Mike Connelly"
+date: "1/23/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+```
+
+```{r}
+# Get the Data
+spotify_songs <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv')
+# Or read in with tidytuesdayR package (https://github.com/thebioengineer/tidytuesdayR)
+# PLEASE NOTE TO USE 2020 DATA YOU NEED TO UPDATE tidytuesdayR from GitHub
+# Either ISO-8601 date or year/week works!
+# Install via devtools::install_github("thebioengineer/tidytuesdayR")
+#tuesdata <- tidytuesdayR::tt_load('2020-01-21') 
+#tuesdata <- tidytuesdayR::tt_load(2020, week = 4)
+#spotify_songs <- tuesdata$spotify_songs
+```
+
+```{r}
+diplo <- dplyr::filter(spotify_songs, track_artist == "Diplo")
+beatles <- dplyr::filter(spotify_songs, track_artist == "The Beatles")
+rolling_stones <- dplyr::filter(spotify_songs, track_artist == "The Rolling Stones")
+led_zeppelin <- dplyr::filter(spotify_songs, track_artist == "Led Zeppelin")
+big_three <- dplyr::filter(spotify_songs, track_artist == "The Beatles" | track_artist == "The Rolling Stones" | track_artist == "Led Zeppelin")
+big_three_clean <- big_three %>% dplyr::arrange(desc(track_popularity)) %>% dplyr::distinct(., track_id, .keep_all = TRUE)
+```
+```{r}
+big3plot <- ggplot(big_three, aes(x = tempo, y = danceability))
+big3plot + geom_point(aes(color = track_artist, size = track_popularity)) +
+  facet_grid(~track_artist)
+```
+
+```{r}
+songs <- spotify_songs %>% arrange(desc(track_album_release_date)) %>%
+  dplyr::distinct(., track_id, .keep_all = TRUE) %>%
+  arrange(desc(duration_ms))
+songs$track_date <- lubridate::as_date(songs$track_album_release_date)
+songsplot <- ggplot(songs, aes(x = track_date, y = duration_ms))
+songsplot +
+  geom_point(aes()) + 
+  facet_wrap(~playlist_genre)
+```
+
