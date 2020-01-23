@@ -1,0 +1,65 @@
+---
+title: "TidyTuesday_Spotify"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Get the Data
+
+spotify_songs <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv')
+
+# Or read in with tidytuesdayR package (https://github.com/thebioengineer/tidytuesdayR)
+# PLEASE NOTE TO USE 2020 DATA YOU NEED TO UPDATE tidytuesdayR from GitHub
+
+# Either ISO-8601 date or year/week works!
+
+# Install via devtools::install_github("thebioengineer/tidytuesdayR")
+
+library(tidyr)
+library(ggplot2)
+library(dplyr)
+
+install.packages("devtools")
+
+devtools::install_github("thebioengineer/tidytuesdayR")
+
+library(devtools)
+
+tuesdata <- tidytuesdayR::tt_load('2020-01-21') 
+tuesdata <- tidytuesdayR::tt_load(2020, week = 4)
+
+spotify_songs <- tuesdata$spotify_songs
+spotify_songs %>%
+  dplyr::arrange(desc(track_popularity)) %>%
+  dplyr::distinct(., track_id, .keep_all=TRUE) %>%
+  filter(track_popularity > quantile (spotify_songs$track_popularity, 0.9)) %>%
+  group_by(playlist_genre) %>%
+  summarise(n = n()) %>%
+  ggplot(data=., aes(x=playlist_genre, y = n)) +geom_bar(stat = "identity")
+
+#filter by track popularity 
+#remove any duplicates
+#filter by picking tracts that were in top 90%
+#ground by playlist genre 
+#arrange smallest to largest, desc makes it largest to smallest 
+
+#band <- spotify_songs %>% dplyr::filter(track_artist == "Bruce Springsteen")
+#bruce <- ggplot(data = band, aes(x=playlist_genre, y=danceability)) 
+#bruce + geom_boxplot()
+
+spotify_songs %>%
+  ggplot(data=., aes(x=playlist_genre, y=danceability)) + 
+  geom_boxplot()
+
+
+ggplot(spotify_songs, aes(x= playlist_genre, y=danceability)) + geom_bar()
+
+
+
+
+
+```
+
+
