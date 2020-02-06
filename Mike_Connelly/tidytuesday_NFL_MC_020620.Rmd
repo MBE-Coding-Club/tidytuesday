@@ -1,0 +1,56 @@
+---
+title: "Tidytuesday_NFL_MC_020620"
+author: "Mike Connelly"
+date: "2/6/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(gplots)
+library(teamcolors)
+```
+
+```{r}
+# Get the Data
+
+attendance <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-04/attendance.csv')
+standings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-04/standings.csv')
+games <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-04/games.csv')
+```
+```{r}
+head(standings)
+```
+
+```{r}
+gobirds <- attendance %>% filter(team_name=="Eagles") %>% drop_na(weekly_attendance)
+gobirds$year <- factor(gobirds$year, ordered = TRUE)
+```
+```{r}
+bird_nest <- gobirds %>% ggplot(aes(x=week, y=weekly_attendance))
+bird_nest + geom_line(aes(color = year))
+##group year and week into one variable, set as ordered factor
+```
+
+```{r}
+
+team_colors <- col2hex(league_pal("nfl"))
+teamcolors::show_team_col()
+
+season_2019 <- season_2019 %>%
+  arrange(desc(home_team_city)) %>%
+  mutate(pts_diff = pts_win-pts_loss) %>%
+  mutate(turnover_diff = turnovers_win-turnovers_loss) %>%
+  mutate(yds_diff = yds_win-yds_loss)
+season_2019$week <- factor(season_2019$week, levels = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,"WildCard","Division","ConfChamp","SuperBowl"), ordered = TRUE)
+
+games_diff <- season_2019 %>% ggplot(aes(x=yds_diff, y=turnover_diff))
+games_diff + 
+  geom_hline(yintercept = 0) +
+  geom_point(aes(size = pts_diff, color = home_team_city)) +
+  scale_color_manual(values = team_colors) +
+  scale_size_area(max_size = 10) +
+  facet_wrap(~week)
+```
+
