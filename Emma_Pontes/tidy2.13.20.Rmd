@@ -1,0 +1,82 @@
+---
+title: "TidyTuesday2.13.20"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(gplots)
+devtools::install_github("thebioengineer/tidytuesdayR")
+```
+
+# Two ways to get the Data:
+#NUMBER 1#
+```{r}
+hotels <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-11/hotels.csv')
+head(hotels)
+```
+
+#NUMBER 2#
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2020-02-11')
+hotels2 <- tuesdata$hotels
+```
+
+#Whats does the data look like?
+```{r}
+head(hotels)
+```
+
+#Defining a variable: length of stay
+```{r}
+length_of_stay<-(hotels$stays_in_weekend_nights+hotels$stays_in_week_nights)
+```
+
+#Making a plot
+```{r}
+g<-ggplot(data=hotels)+geom_point(aes(x=hotels$lead_time,y=length_of_stay), color="purple3", size=0.5)+geom_smooth(aes(x=hotels$lead_time,y=length_of_stay),method=lm)
+g<-g+labs(x="Lead Time in Days", y="Length of Stay in Days", caption="Figure 1. This is a nonsensical graph for TidyTuesday that examines the relationship between booking time and length of stay in a hotel")
+g<-g+ggtitle("Booking Time vs. Length of Stay")
+g
+```
+
+#will this work for regression line?
+```{r}
+require(stats)
+reg<-lm(length_of_stay ~ hotels$lead_time, data = hotels)
+reg
+```
+
+#maybe this will work?
+```{r}
+g<-g+geom_abline(intercept=3.036681, slope=0.003761)
+g
+```
+
+#Loading the right packages
+```{r}
+library(tidyverse)
+library(tidyr)
+library(dplyr)
+```
+
+#Coding Club code from Allyson
+```{r}
+resorts_july<-hotels[(hotels$hotel == "Resort Hotel" & hotels$arrival_date_month == "July"),] %>% select("hotel", "country", "babies")
+
+
+filter(hotels, hotel =="Resort Hotel" & arrival_date_month == "July") %>% select("hotel", "stays_in_week_nights", "babies")
+
+resorts_august<-hotels[(hotels$hotel == "Resort Hotel" & hotels$arrival_date_month == "August"),] %>% select("hotel", "country", "babies")
+```
+
+```{r}
+hotels[1:4,1:3]
+```
+
+
+
+
+
+
+
