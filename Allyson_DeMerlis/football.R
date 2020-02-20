@@ -31,7 +31,7 @@ summarySE(attendance,measurevar=attendance,groupvars=year,na.rm=T)
 
 attendance %>% 
   group_by(year) %>%
-  summarise(mean=mean(weekly_attendance, na.rm=T)) %>% view()
+  summarise(mean=mean(weekly_attendance, na.rm=T)) %>% View()
 
 
 
