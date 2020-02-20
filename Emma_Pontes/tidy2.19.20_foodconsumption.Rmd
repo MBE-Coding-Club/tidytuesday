@@ -1,0 +1,82 @@
+---
+title: "TidyTuesday 2.19.20"
+output:
+  html_document: default
+  pdf_document: default
+---
+#Getting the Data and checking it out
+```{r}
+food_consumption <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-18/food_consumption.csv')
+head(food_consumption)
+library("ggplot2")
+library("tidyverse")
+```
+
+#filtering CO2 emmissions from beef only
+```{r}
+beef_consumption<-food_consumption[(food_consumption$food_category == "Beef"),]
+```
+
+#Beef Consumption Plot
+```{r}
+beef_plot<-ggplot(beef_consumption, aes(x=beef_consumption$country, y=beef_consumption$co2_emmission))+geom_col(fill="cyan3")
+beef_plot<-beef_plot + theme(axis.text.x=element_text(angle=45, size=3))
+beef_plot<-beef_plot + labs(x="Country",y="CO2 Emmissions from Beef Consumption",title="CO2 Emmissions from Beef Consumption by Country")
+beef_plot
+```
+
+#Average CO2 emmission by country
+```{r}
+require(readr)
+require(ggplot2)
+require(Rmisc)
+summary.CO2=summarySE(data=food_consumption,measurevar='co2_emmission',groupvars=c('country'))
+summary.CO2
+```
+
+#Average CO2 emmission by country, sorted from high to low... but when i graphed, it wasn't sorted high to low...
+```{r}
+sort.summary.CO2 <- summary.CO2[order(-summary.CO2$co2_emmission),]
+sort.summary.CO2
+```
+
+#countries with CO2 emmissions > 100 only
+```{r}
+filtered_summary<-filter(sort.summary.CO2, co2_emmission > 100)
+filtered_summary
+```
+
+#sorted highest to lowest!
+```{r}
+co2_plot<-ggplot(filtered_summary, aes(x=reorder(country, -co2_emmission), y=co2_emmission))+geom_col(fill="orchid3")
+co2_plot<-co2_plot + theme(axis.text.x=element_text(angle=45, size=8, family="serif"),axis.text.y=element_text(family="serif"))
+co2_plot<-co2_plot + labs(x="Country", y="CO2 Emmission", title="Countries with Highest CO2 Emmissions")
+co2_plot
+```
+
+#attempt at stacked bar graph of highest polluters
+#adding average CO2 emmissions to food_conumption which includes food category
+```{r}
+joined<-merge(food_consumption,filtered_summary,by="country")
+joined
+```
+
+#including only highest CO2 contributors by average
+```{r}
+big_co2_category<-filter(joined, co2_emmission.y > 100)
+big_co2_category
+```
+
+#stacked bar graph of CO2 emmissions by country and food category!
+```{r}
+g<-ggplot(data=big_co2_category, aes(fill=food_category, y=co2_emmission.x,x=reorder(country,-co2_emmission.y)))
+g<-g+geom_bar(position="stack", stat="identity")
+g<-g + theme(axis.text.x=element_text(angle=45, size=8, family="serif"),legend.text=element_text(size=10, family="serif"), legend.title=element_text(size=10, family="serif"))
+g<-g + labs(x="Country", y="CO2 Emmission", title="CO2 Emmissions by Country and Food Type", fill="Food Category", family="serif")
+g
+ggsave('CO2 emmissions by Country and Food Type.pdf')
+```
+
+
+
+
