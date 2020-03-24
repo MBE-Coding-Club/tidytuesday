@@ -1,0 +1,32 @@
+---
+title: "Tidytuesday_Office_MC_032420"
+author: "Mike Connelly"
+date: "3/24/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidytext)
+#install.packages("schrute")
+library(schrute)
+```
+
+```{r}
+# Get the Data
+office_ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-17/office_ratings.csv')
+```
+
+```{r}
+office <- schrute::theoffice
+```
+
+```{r}
+plot1 <- office_ratings %>%
+  ggplot(aes(x = air_date, y = imdb_rating)) +
+  geom_point(aes(size = total_votes)) + 
+  geom_text(aes(label = ifelse(imdb_rating>9, as.character(title),'')), hjust = 0, vjust = 0)
+plot1 
+```
+
