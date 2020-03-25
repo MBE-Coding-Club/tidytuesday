@@ -1,0 +1,66 @@
+---
+title: "Tidytuesday_BrainInjury_MC_032520"
+author: "Mike Connelly"
+date: "3/24/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(patchwork)
+```
+
+```{r}
+# Get the Data
+tbi_age <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-24/tbi_age.csv')
+tbi_year <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-24/tbi_year.csv')
+tbi_military <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-24/tbi_military.csv')
+```
+
+```{r}
+
+```
+
+```{r}
+plot1 <- tbi_age %>%
+  ggplot(aes(x = injury_mechanism, y = number_est)) + 
+  geom_col() + 
+  facet_wrap(~age_group)
+plot1
+```
+```{r}
+plot2 <- tbi_age %>%
+  ggplot(aes(x = injury_mechanism, y = rate_est)) +
+  geom_point()
+plot2
+```
+
+```{r}
+crash_age <- tbi_age %>% filter(injury_mechanism == "Motor Vehicle Crashes")
+crash_age <- crash_age %>% filter(age_group != "0-17" & age_group != "Total")
+crash_age$age_group <- factor(crash_age$age_group, levels = c("0-4", "5-14", "15-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75+", "Total"), ordered = T)
+crash_year <- tbi_year %>% filter(injury_mechanism == "Motor vehicle crashes")
+crash_year$injury_mechanism <- gsub("Motor vehicle crashes", "Motor Vehicle Crashes", crash_year$injury_mechanism)
+crash_year$year <- as.factor(crash_year$year)
+```
+```{r}
+crash_join <- dplyr::full_join(crash_age, crash_year, by = "injury_mechanism")
+crash_join$year <- as.factor(crash_join$year)
+crash_join$age_group <- factor(crash_join$age_group, levels = c("0-4", "5-14", "15-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75+", "Total", "0-17"), ordered = T)
+```
+
+```{r}
+plot3 <- crash_year %>% 
+  ggplot(aes(x = year, y = number_est)) +
+  geom_col(aes(fill = type)) +
+  ggtitle("TBI caused by Motor Vehicle Crashes 2006 - 2014")
+plot4 <- crash_age %>% 
+  ggplot(aes(x = age_group, y = number_est)) +
+  geom_col(aes(fill = type)) +
+  ggtitle("Age Groups affected by Motor Vehicle-induced TBI in 2014")
+
+plot3 / plot4
+ggsave(filename = "TBI_032520.pdf")
+```
+
