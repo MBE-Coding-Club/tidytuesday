@@ -1,0 +1,38 @@
+---
+title: "TidyTuesday 3.25.20"
+output: html_document
+---
+
+#Read in the data
+```{r}
+tbi_age <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-24/tbi_age.csv')
+tbi_year <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-24/tbi_year.csv')
+tbi_military <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-24/tbi_military.csv')
+```
+
+#Loading the appropriate libraries
+```{r}
+library("ggplot2")
+library("tidyverse")
+library("dplyr")
+```
+
+#Removing NA under 'Total' column
+```{r}
+na.omit(tbi_year)
+```
+
+```{r}
+a<-as.factor(tbi_year$year)
+```
+
+#Creating stacked bar graph: injury mechanism by number of cases and year
+```{r}
+g<-ggplot(data=tbi_year,aes(fill=injury_mechanism,x=factor(year),y=number_est))
+g<-g+geom_bar(position="stack", stat="identity")
+g<-g + labs(x="Year", y="Number of Cases", title="Head Injuries by Year and Injury Mechanism", family="serif")
+g<-g + scale_fill_discrete(name = "Injury Mechanism")
+g
+```
+
+
