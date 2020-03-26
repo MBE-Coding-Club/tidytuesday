@@ -5,7 +5,6 @@ tbi_year <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/t
 tbi_military <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-24/tbi_military.csv')
 
 library(tidyverse)
-library(cowplot)
 ###############################################################################################
 list(unique(tbi_age$injury_mechanism))
 ######################################################################################################
