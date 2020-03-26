@@ -19,10 +19,6 @@ tbi_military <- readr::read_csv('https://raw.githubusercontent.com/rfordatascien
 ```
 
 ```{r}
-
-```
-
-```{r}
 plot1 <- tbi_age %>%
   ggplot(aes(x = injury_mechanism, y = number_est)) + 
   geom_col() + 
@@ -61,6 +57,6 @@ plot4 <- crash_age %>%
   ggtitle("Age Groups affected by Motor Vehicle-induced TBI in 2014")
 
 plot3 / plot4
-ggsave(filename = "TBI_032520.pdf")
+#ggsave(filename = "TBI_032520.pdf")
 ```
 
