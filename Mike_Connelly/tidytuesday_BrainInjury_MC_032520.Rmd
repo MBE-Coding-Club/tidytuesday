@@ -31,7 +31,6 @@ plot2 <- tbi_age %>%
   geom_point()
 plot2
 ```
-
 ```{r}
 crash_age <- tbi_age %>% filter(injury_mechanism == "Motor Vehicle Crashes")
 crash_age <- crash_age %>% filter(age_group != "0-17" & age_group != "Total")
@@ -45,7 +44,6 @@ crash_join <- dplyr::full_join(crash_age, crash_year, by = "injury_mechanism")
 crash_join$year <- as.factor(crash_join$year)
 crash_join$age_group <- factor(crash_join$age_group, levels = c("0-4", "5-14", "15-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75+", "Total", "0-17"), ordered = T)
 ```
-
 ```{r}
 plot3 <- crash_year %>% 
   ggplot(aes(x = year, y = number_est)) +
