@@ -11,6 +11,7 @@ library(tidyverse)
 library(tidytext)
 #install.packages("schrute")
 library(schrute)
+library(patchwork)
 ```
 
 ```{r}
@@ -26,7 +27,28 @@ office <- schrute::theoffice
 plot1 <- office_ratings %>%
   ggplot(aes(x = air_date, y = imdb_rating)) +
   geom_point(aes(size = total_votes)) + 
-  geom_text(aes(label = ifelse(imdb_rating>9, as.character(title),'')), hjust = 0, vjust = 0)
+  geom_text(aes(label = ifelse(imdb_rating>9, as.character(title),'')), hjust = 0, vjust = 0) +
+  #geom_smooth() +
+  ggtitle("Best Office Episodes by IMDB Rating")
 plot1 
+ggsave(filename = "Office_BestEpisodes_032620.pdf")
 ```
+
+```{r}
+best_office <- office %>% filter(imdb_rating >= 9)
+best_office_chars <- best_office %>%
+  count(character) %>%
+  filter(n >= 20) %>%
+  arrange(desc(n))
+best_office_chars$character <- factor(best_office_chars$character, levels = best_office_chars$character, ordered = TRUE)
+###
+plot2 <- best_office_chars %>%
+  ggplot(aes(x = character, y = n)) +
+  geom_col(aes(fill = character)) +
+  theme(axis.text.x = element_text(angle = 315)) +
+  ggtitle("Number of lines per character in All-Time Best Office Episodes")
+plot2
+ggsave(filename = "Office_Characters_032620.pdf")
+```
+
 
