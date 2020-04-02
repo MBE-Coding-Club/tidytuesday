@@ -1,0 +1,43 @@
+---
+title: "tidyTuesday_Feb20_2020"
+author: "Nick Kron"
+date: "2/20/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load packages, error=FALSE, message=FALSE, echo=FALSE}
+
+library(tidyverse)
+
+```
+
+```{r load data, error=FALSE, message=FALSE, echo=FALSE}
+
+# Get the Data
+
+food_consumption <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-18/food_consumption.csv')
+
+
+```
+
+
+```{r}
+
+food_consumption %>%
+  select(country, food_category, consumption) %>%
+  pivot_wider(data = ., names_from = food_category, values_from = consumption) %>%
+  column_to_rownames("country") %>%
+  cor(., method = "spearman") %>%
+  as.data.frame() %>%
+  pivot_longer(data =., values_to = "correlation", names_to = "foodstuff", cols = ) %>%
+  ggplot(data =., aes(x = correlation, y = foodstuff, fill = correlation)) + geom_tile()
+  ComplexHeatmap::Heatmap(matrix = ., 
+                          column_title = "Correlation in Rate of Consumption of Foodstuffs",
+                          column_names_rot = -45)
+
+```
+
