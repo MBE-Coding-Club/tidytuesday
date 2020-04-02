@@ -10,10 +10,7 @@ injuries_by_age <- tbi_age %>%
   filter(age_group != "Total")
 
 ggplot(data=injuries_by_age, aes(x=age_group,y=number_est, fill=injury_mechanism))+
-  geom_col()
-  
-
-ggplot(data=totalinjuries, aes(x=year,y=rate_est, fill=type)) +
-  geom_bar(stat="identity", position=position_dodge())
-
-
+  geom_col() + theme_classic() +
+  xlab("Age Group") +
+  ylab("Number of Cases")+ 
+  scale_y_continuous(format(x,scientific=FALSE))
