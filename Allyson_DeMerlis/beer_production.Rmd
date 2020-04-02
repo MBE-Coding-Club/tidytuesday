@@ -55,7 +55,7 @@ percent_change <- beer_states %>%
 percent_change
 
 plot_usmap(data = percent_change, values = "pct_change") + 
-  scale_fill_gradient2(label = scales::comma, name = "% change") +
+  scale_fill_gradient2(name = "% change") +
   labs(title = "Percentage change in beer production by state from 2018 to 2019",
        caption = "Visualisation adapted from Ella Kaye, Data from Alcohol and Tabacoo Tax and Trade Bureau") +
   theme(legend.position = "right",
