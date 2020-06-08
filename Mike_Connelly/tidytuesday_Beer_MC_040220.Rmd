@@ -1,0 +1,83 @@
+---
+title: "Tidytuesday_Beer_MC_040220"
+author: "Mike Connelly"
+date: "4/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidytext)
+library(patchwork)
+#install.packages("usmap")
+library(usmap)
+```
+```{r}
+#install.packages(c("rgeos", "sf", "maps", "ggspatial", "rnaturalearth"))
+```
+```{r}
+# Get the Data
+brewing_materials <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-31/brewing_materials.csv')
+beer_taxed <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-31/beer_taxed.csv')
+brewer_size <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-31/brewer_size.csv')
+beer_states <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-31/beer_states.csv')
+```
+
+```{r}
+beer_states <- beer_states %>% filter(year >= "2015")
+beer_states$year <- factor(beer_states$year, levels = c("2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019"))
+```
+```{r}
+# helpful page for mapping the us by region, state, county! https://cran.r-project.org/web/packages/usmap/vignettes/mapping.html
+plot_usmap(regions = "states") + 
+  labs(title = "US States",
+       subtitle = "This is a blank map of the United States.") + 
+  theme(panel.background = element_rect(color = "black", fill = "lightblue"))
+```
+```{r}
+us_beer <- plot_usmap(data = beer_states, values = "barrels", color = "black", include = c(.northeast_region, .south_atlantic)) + 
+  scale_fill_continuous(name = "Barrels", label = scales::comma, low = "white", high = "dark green") + 
+  theme(legend.position = "right")
+us_beer + facet_grid(~year)
+ggsave(filename = "./eastcoast_beer.pdf", dev = "pdf", width = 6, height = 4)
+```
+
+```{r explore-data}
+pct_change_by_state <- beer_states %>%
+  filter(state != "total") %>%
+  group_by(state, year) %>%
+  summarise(total_barrels = sum(barrels)) %>%
+  filter(year %in% c(2015, 2019)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = year, values_from = total_barrels) %>%
+  mutate(pct_change = (`2019`-`2015`)*100/`2015`) %>%
+  mutate(pct_change = round(pct_change)) %>%
+  arrange(desc(pct_change)) %>%
+  mutate(state = as_factor(state))
+pct_change_by_state
+```
+```{r}
+ggplot(pct_change_by_state) +
+  geom_col(aes(y = fct_reorder(state, pct_change), x = pct_change))
+```
+```{r}
+plot_usmap(data = pct_change_by_state, values = "pct_change", include = c(.northeast_region, .south_atlantic)) +
+  scale_fill_gradient2(label = scales::comma, name = "% change", low = "white", high = "dark green", breaks = c(-50, 0, 200, 400, 600)) +
+  labs(title = "Percentage change in beer production by state from 2015 to 2019",
+       caption = "Visualisation by Ella Kaye, Data from Alcohol and Tabacoo Tax and Trade Bureau")
+```
+```{r}
+brewer_changes <- brewer_size %>%
+  select(-taxable_removals) %>%
+  filter(brewer_size != "Total") %>%
+  filter(brewer_size != "Under 1 Barrel") %>%
+  filter(brewer_size != "Zero Barrels") %>%
+  filter(year %in% c(2015, 2019))
+brewer_changes$year <- factor(brewer_changes$year, levels = c("2015", "2019"))
+#brewer_changes$brewer_size <- gsub(" Barrels", brewer_changes$brewer_size)
+brewer_changes$brewer_size <- factor(brewer_changes$brewer_size, levels = c("1 to 1,000", "1,001 to 7,500", "7,501 to 15,000", "15,001 to 30,000", "30,001 to 60,000", "60,001 to 100,000", "100,001 to 500,000", "500,001 to 1,000,000", "1,000,001 to 1,999,999", "2,000,000 to 6,000,000", "6,000,001 and Over"))
+brewer_changes %>% ggplot(aes(x = brewer_size, y = total_barrels, fill = year)) + geom_col(position = "dodge2") + scale_fill_manual(values = c("red", "blue")) + theme(axis.text.x = element_text(angle = 330))
+?geom_col
+```
+

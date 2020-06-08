@@ -55,7 +55,7 @@ percent_change <- beer_states %>%
 percent_change
 
 plot_usmap(data = percent_change, values = "pct_change") + 
-  scale_fill_gradient2(label = scales::comma, name = "% change") +
+  scale_fill_gradient2(name = "% change") +
   labs(title = "Percentage change in beer production by state from 2018 to 2019",
        caption = "Visualisation adapted from Ella Kaye, Data from Alcohol and Tabacoo Tax and Trade Bureau") +
   theme(legend.position = "right",
@@ -67,5 +67,46 @@ plot_usmap(data = percent_change, values = "pct_change") +
                                   color = "grey70",
                                   hjust = .5)) 
  
+```
+
+#looking at size of brewers per year
+```{r}
+
+brewery_size_yearly <- brewer_size %>%
+  select(year, brewer_size, n_of_brewers) %>%
+  filter(brewer_size != "Total") %>%
+  filter(brewer_size != "Under 1 Barrel")
+
+unique(brewery_size_yearly$year)
+
+barplot_2009 <- brewery_size_yearly %>% 
+  filter(year == 2009) %>%
+  ggplot(aes(x="", y=n_of_brewers, fill = brewer_size))+
+  geom_bar(width = 1, stat = "identity") 
+
+piechart_2009 <- barplot_2009 + coord_polar("y", start=0) +
+  labs(x = "", y = "", fill="Size") 
+
+barplot_2019 <- brewery_size_yearly %>% 
+  filter(year == 2019) %>%
+  ggplot(aes(x="", y=n_of_brewers, fill = brewer_size))+
+  geom_bar(width = 1, stat = "identity") 
+
+piechart_2019 <- barplot_2019 + coord_polar("y", start=0) +
+  labs(x = "", y = "", fill="Size") 
+
+library(cowplot)
+
+plot_grid(piechart_2009,piechart_2019, labels = c("2009", "2019"))
+
+barplot_2011
+
+barplot_2012
+
+
+
+
+
+
 ```
 
