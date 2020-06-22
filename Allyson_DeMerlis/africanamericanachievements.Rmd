@@ -1,0 +1,37 @@
+---
+title: "africanamericanachievements"
+author: "allyson_demerlis"
+date: "6/8/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+#importing the data from GitHub
+```{r}
+library(tidyverse)
+
+firsts <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-09/firsts.csv')
+science <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-09/science.csv')
+```
+
+science data
+```{r}
+
+str(science)
+unique(science$occupation_s)
+
+science %>% filter(occupation_s == "Scientist")
+```
+
+
+firsts
+```{r}
+
+select(firsts, year, gender, category) %>% group_by(gender, category) %>% mutate(count = n()) %>% dplyr::filter(year >= 1950) %>% ggplot(., aes(x=year, y = count, fill = category)) + geom_bar(stat = "identity") + theme_classic()
+
+```
+
