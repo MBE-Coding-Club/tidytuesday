@@ -1,0 +1,67 @@
+---
+title: "kron_tidy_tuesday_6-22-2020"
+author: "Nick Kron"
+date: "6/22/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load libraries, echo = FALSE, warning=FALSE, message=FALSE}
+
+## from https://www.r-spatial.org/r/2018/10/25/ggplot2-sf.html
+
+install.packages(c("cowplot", "googleway", "ggplot2", "ggrepel","ggspatial", "libwgeom", "sf", "rnaturalearth", "rnaturalearthdata"))
+
+library(tidyverse)
+library("sf")
+
+library("rnaturalearth")
+library("rnaturalearthdata")
+library("ggspatial")
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+```
+
+
+```{r get data,  echo = FALSE, warning=FALSE, message=FALSE}
+# Get the Data
+
+individuals <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-23/individuals.csv')
+locations <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-23/locations.csv')
+
+
+```
+
+```{r, fig.width= 12, fig.height=12}
+
+
+ggplot(data = world) +
+  theme_bw() +
+  geom_sf() +
+  theme(legend.position = "none") +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  annotation_north_arrow(
+    location = "bl",
+    which_north = "true",
+    pad_x = unit(0.75, "in"),
+    pad_y = unit(0.5, "in"),
+    style = north_arrow_fancy_orienteering
+  ) +
+  coord_sf(xlim = c(min(locations$longitude ),
+                    max(locations$longitude )), 
+           ylim = c(54,
+                    56)
+    )+
+  geom_line(inherit.aes = FALSE, data = locations %>% filter(., animal_id %in% (individuals %>% filter(death_cause == "Predation - Wolf")%>% head() )$animal_id) , 
+            aes(x = longitude, y= latitude, color = animal_id)) +
+  geom_point(inherit.aes = FALSE, data = (individuals %>% filter(death_cause == "Predation - Wolf") %>% head()), 
+             aes(x = deploy_off_longitude, y = deploy_off_latitude, color = animal_id), size = 5)
+
+
+
+```
+
