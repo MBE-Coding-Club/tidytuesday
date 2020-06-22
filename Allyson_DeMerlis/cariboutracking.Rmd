@@ -1,0 +1,50 @@
+---
+title: "cariboutracking"
+author: "allyson_demerlis"
+date: "6/22/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Importing the Data
+```{r}
+library(tidyverse)
+
+individuals <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-23/individuals.csv')
+locations <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-23/locations.csv')
+
+```
+
+
+
+```{r}
+
+unique(individuals$death_cause)
+unique(individuals$study_site)
+
+unique(individuals$animal_id)
+unique(locations$animal_id)
+
+individuals %>% select(animal_id, sex, pregnant, with_calf, death_cause,study_site) %>% 
+  drop_na(pregnant) %>% group_by(pregnant,study_site,with_calf) %>% mutate(count = n()) %>% 
+  ggplot(., aes(x=study_site, y=count, fill=with_calf)) + geom_bar(stat="identity", position=position_dodge())+facet_wrap(~pregnant)
+  
+  
+individuals %>% group_by(deploy_off_type,study_site) %>% mutate(count = n()) %>% 
+  select(deploy_off_type, study_site,count) %>% 
+  distinct() %>% 
+ggplot(., aes(x=deploy_off_type, y=count, fill=study_site)) +geom_bar(stat = "identity") +
+  scale_fill_brewer(palette = "Greens")
+
+locations %>% select(!event_id) %>% group_by(study_site, season) %>% distinct(animal_id) %>% summarise(total = length(animal_id)) %>% 
+  ggplot(.,aes(x=study_site, y=total, fill=season)) + geom_bar(stat="identity", position = position_dodge()) + theme_classic() + scale_fill_brewer(palette = "Pastel1")
+  
+
+
+
+```
+
