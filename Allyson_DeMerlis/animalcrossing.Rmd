@@ -1,0 +1,110 @@
+---
+title: "animalcrossing"
+author: "allyson_demerlis"
+date: "5/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+importing the data and loading libraries
+```{r}
+critic <- readr::read_tsv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-05/critic.tsv')
+user_reviews <- readr::read_tsv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-05/user_reviews.tsv')
+items <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-05/items.csv')
+villagers <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-05/villagers.csv')
+
+library(tidyverse)
+
+install.packages("plotly")
+install.packages("htmlwidgets")
+
+library(plotly)
+library(htmlwidgets)
+```
+
+exploring villagers data
+```{r}
+length(unique(villagers$species))
+
+villager <- villagers %>% 
+  select(name, gender, species, personality, birthday) %>%
+  group_by(species) %>%
+  summarise(count = length(name)) %>%
+  arrange(desc(count)) %>%
+  top_n(6, count)
+
+top6villagersbarplot <- ggplot(villager, aes(x="", y = count, fill = species)) + geom_bar(width = 1, stat = "identity", colour="black") + scale_color_manual(values = c("#FFC1C1", "#66CDAA", "#7AC5CD", "#FFE4C4", "#EED2EE", "#B4EEB4", "#F0FFF0"), aesthetics = "fill")
+
+
+top6piechart <- top6villagersbarplot + coord_polar("y", start=0) + labs(x="", y="Kinds of Villagers", fill="Species") +theme_classic()
+
+```
+
+
+
+exploring items data
+
+```{r}
+
+head(items)
+
+subset <- items %>% arrange(desc(sell_value)) %>% filter(category == "Seashells" | category == "Fossils" | category == "Bugs" | category == "Fish") %>% select(-sources) %>% distinct() %>% top_n(50, sell_value)
+
+unique(items$category)
+
+seashells_prices <- items %>% filter(category == "Seashells") %>% arrange(desc(sell_value))
+
+fossils_prices <- items %>% filter(category == "Fossils") %>% arrange(desc(sell_value)) %>% top_n(9, id)
+
+bugs_prices <- items %>% filter(category == "Bugs") %>% arrange(desc(sell_value)) %>% top_n(9, id)
+
+fish_prices <- items %>% filter(category == "Fish") %>% select(-sources) %>% distinct() %>% arrange(desc(sell_value)) 
+
+ggplot(seashells_prices, aes(x=reorder(name, - sell_value), y=sell_value, fill = name)) + 
+  geom_bar(width = 0.75, stat="identity", color="black") + 
+  scale_color_manual(values = c("#FFC1C1", "#66CDAA", "#7AC5CD", "#FFE4C4", "#EED2EE", "#B4EEB4", "#F0FFF0", "#7AC5CD"), aesthetics = "fill") +
+  theme_classic() +
+  labs(x="Type", y="Sell Value (Bells)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="none") +
+  geom_text(aes(label=sell_value), vjust=1.6, color="black", size=3.5) 
+
+
+ggplot(fossils_prices, aes(x=reorder(name, - sell_value), y=sell_value, fill = name)) + 
+  geom_bar(width = 0.75, stat="identity", color="black") +
+  theme_classic() +
+  labs(x="Type", y="Sell Value (Bells)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="none") + scale_color_brewer("Greys", aesthetics = "fill")
+
+ggplot(bugs_prices, aes(x=reorder(name, - sell_value), y=sell_value, fill = name)) + 
+  geom_bar(width = 0.75, stat="identity", color="black") +
+  theme_classic() +
+  labs(x="Type", y="Sell Value (Bells)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="none") + scale_color_brewer("BrBG", aesthetics = "fill")
+
+ggplot(fish_prices, aes(x=reorder(name, - sell_value), y=sell_value, fill = name)) + 
+  geom_bar(width = 0.75, stat="identity", color="black") +
+  theme_classic() +
+  labs(x="Type", y="Sell Value (Bells)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),legend.position="none")
+
+scatterPlot <- subset %>% 
+  ggplot(aes(x = reorder(name, - sell_value), y = sell_value, fill = category)) + 
+  geom_point(alpha=0.7, colour = "#51A0D5") + 
+  labs(x = "Type", 
+       y = "Sell Value (Bells)") +
+  theme_classic() + theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+
+ggplotly(scatterPlot)
+
+
+
+```
+
+
+
+
