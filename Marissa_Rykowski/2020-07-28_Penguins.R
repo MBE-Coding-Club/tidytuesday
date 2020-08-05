@@ -15,9 +15,17 @@ Adelie <- penguins %>%
          AvgFlipLen = mean(flipper_length_mm),
          AvgBodyMass = mean(body_mass_g))
 
-ggplot(Adelie,aes(AvgBillLen))+
-  geom_col(aes(fill=sex))+
-  facet_grid(AvgBillLen ~ island)
+############################################################################################
+  
+
+penguins<-penguins %>%
+  na.omit(penguins)
+  
+ggplot(penguins,aes(x=bill_length_mm,y=bill_depth_mm,color=sex))+
+  geom_point()+
+  facet_grid(.~island)+
+  labs(x="Bill Length (mm)",y="Bill Depth (mm)")+
+  scale_color_discrete(name="Sex",labels=c("Female","Male"))
 
 ####################################################################################################  
 
