@@ -1,0 +1,99 @@
+---
+title: "palmerpenguins"
+author: "allyson_demerlis"
+date: "7/27/2020"
+output: html_document
+---
+
+inputting variables
+```{r}
+penguins <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins.csv')
+
+penguins_raw <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins_raw.csv')
+
+library(tidyverse)
+```
+
+exploratory data
+```{r}
+
+
+
+
+
+
+penguins$year <- as.factor(penguins$year)
+
+penguins %>% 
+  group_by(year, island, species) %>% 
+  summarise(avg_body_mass = mean(body_mass_g), count = n(), sd = sd(body_mass_g)) %>% 
+  ggplot(., aes(x=year, y=avg_body_mass, fill=species)) + 
+  geom_bar(stat="identity", position=position_dodge()) + 
+  geom_errorbar(mapping = aes(ymin=avg_body_mass - sd, ymax = avg_body_mass + sd),width=.2, position=position_dodge(.9)) +
+  facet_wrap(~island) + 
+  theme_classic()
+
+penguins %>% 
+  group_by(sex, year, island, species) %>% drop_na() %>% 
+  summarise(avg_body_mass = mean(body_mass_g), count = n(), sd = sd(body_mass_g)) %>% 
+  ggplot(., aes(x=year, y=avg_body_mass, fill=sex)) + 
+  geom_bar(stat="identity", position=position_dodge()) + 
+  facet_wrap(~species) + 
+  theme_classic()
+
+penguins %>% drop_na() %>% 
+  group_by(sex, year, island, species) %>% 
+  drop_na() %>% 
+  summarise(count = n()) %>% 
+  ggplot(., aes(x=year, y=count, fill=sex)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  facet_wrap(~island) + 
+  theme_classic()
+
+
+ggplot(penguins, aes(x=year, y=bill_length_mm, fill = species)) + geom_boxplot()
+
+
+ggplot(penguins, aes(x=island, y=bill_length_mm, fill = species)) + geom_boxplot()
+
+
+ggplot(penguins, aes(x=year, y=flipper_length_mm, fill = species)) + geom_boxplot()
+
+
+ggplot(penguins, aes(x=year, y=body_mass_g, fill = species)) + geom_boxplot()
+
+# penguins %>% filter(island == "Biscoe" | island == "Dream") %>% 
+#   group_by(year, island, species, sex) %>% 
+#   summarise(count = n(), avg_body_mass = mean(body_mass_g), body_mass_sd = sd(body_mass_g), avg_bill_length = mean(bill_length_mm), bill_length_sd = sd(bill_length_mm), avg_flipper_length = mean(flipper_length_mm), flipper_length_sd = sd(flipper_length_mm)) %>% 
+#   pivot_longer(avg_body_mass:flipper_length_sd, names_to="Metric", values_to = "Value") %>% 
+#   filter(year == "2007") %>% 
+#   ggplot(., aes(x=Metric, y=Value, shape = island, color = species)) + 
+#   geom_point() +
+#   theme_classic() + 
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+penguins %>% drop_na() %>% 
+  filter(island == "Biscoe") %>% 
+ggplot(., aes(x=bill_length_mm, y=bill_depth_mm, color=species)) + geom_point() + facet_wrap(~year)
+
+penguins %>% drop_na() %>% 
+  filter(island == "Biscoe") %>% 
+ggplot(., aes(x=body_mass_g, y=bill_length_mm, color=sex)) + geom_point() + facet_wrap(~year)
+
+
+
+```
+
+
+```{r}
+
+penguins_raw %>% select(`Date Egg`, Species, Island, `Body Mass (g)`, Sex, `Delta 15 N (o/oo)`, `Delta 13 C (o/oo)`) %>% drop_na() %>%
+  ggplot(., aes(x=`Date Egg`, y=`Delta 15 N (o/oo)`, color=Species)) + geom_point()
+  
+  
+
+
+
+
+```
+

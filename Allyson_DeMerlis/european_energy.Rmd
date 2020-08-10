@@ -1,0 +1,55 @@
+---
+title: "european_energy"
+author: "allyson_demerlis"
+date: "8/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+energy_types <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-04/energy_types.csv')
+country_totals <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-04/country_totals.csv')
+```
+
+
+
+```{r}
+
+unique(energy_types$type)
+unique(country_totals$type)
+
+unique(country_totals$country_name)
+
+energy_types %>% pivot_longer(`2016`:`2018`, names_to = "Year", values_to = "Gwh")
+
+country_totals %>% 
+  pivot_longer(`2016`:`2018`, names_to = "Year", values_to = "Gwh") %>% 
+  arrange(desc(Gwh))  %>% 
+  filter(country_name == "Germany" | country_name == "France" | country_name == "Italy")%>% 
+  ggplot(., aes(x=type, y=Gwh, fill=country_name)) + geom_bar(stat="identity", position = position_dodge())
+
+energytypes_subset <- energy_types %>% pivot_longer(`2016`:`2018`, names_to = "Year", values_to = "Gwh") %>% filter(country_name == "Germany" | country_name == "France" | country_name == "Italy")
+
+totalproduced <- country_totals %>% pivot_longer(`2016`:`2018`, names_to = "Year", values_to = "Gwh") %>% arrange(desc(Gwh)) %>% filter(type == "Total net production") %>% filter(country_name == "Germany" | country_name == "France" | country_name == "Italy")
+
+```
+
+top 3 countries
+```{r}
+energy_types %>% pivot_longer(`2016`:`2018`, names_to = "Year", values_to = "Gwh") %>% 
+ggplot(., aes(x=Year, y=Gwh, fill=type)) + geom_boxplot()
+
+ggplot(energytypes_subset, aes(x=Year, y=Gwh, fill=type)) + geom_bar(stat="identity", position=position_dodge()) + facet_wrap(~country_name) + theme_bw()
+```
+
+
+
+wind, hydro, nuclear, geothermal, solar
+```{r}
+energy_types %>% pivot_longer(`2016`:`2018`, names_to = "Year", values_to = "Gwh") %>% filter(type == "Nuclear" | type == "Hydro" | type == "Wind" | type == "Solar" | type == "Geothermal") %>% ggplot(., aes(x=Year, y=Gwh, fill=type)) + geom_bar(stat="identity", position = position_dodge()) + coord_flip()
+```
+
+
+
+
+
+

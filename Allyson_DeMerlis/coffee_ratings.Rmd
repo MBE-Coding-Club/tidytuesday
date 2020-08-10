@@ -1,0 +1,40 @@
+---
+title: "coffee_ratings"
+author: "allyson_demerlis"
+date: "7/6/2020"
+output: html_document
+---
+
+#importing data from github
+```{r}
+coffee_ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv')
+
+library(tidyverse)
+
+```
+
+
+
+```{r}
+unique(coffee_ratings$country_of_origin)
+
+coffee_ratings %>% select(total_cup_points:farm_name,
+                          altitude:producer,
+                          harvest_year,
+                          aroma:quakers) %>% 
+dplyr::group_by(species, country_of_origin) %>% 
+dplyr::summarise(avgscore = mean(total_cup_points)) %>% 
+  ggplot(., aes(x =country_of_origin, y = avgscore, color = species)) + geom_bar(stat = "identity", position = position_dodge())
+
+coffee_ratings %>% select(total_cup_points:farm_name, altitude:producer, harvest_year, aroma:quakers) %>% filter(species == "Arabica") %>%  dplyr::group_by(country_of_origin) %>% dplyr::summarise(avgscore = mean(total_cup_points)) %>% ggplot(., aes(x=country_of_origin, y=avgscore, )) + geom_bar(stat="identity", position = position_dodge())
+
+coffee_ratings %>% select(total_cup_points:farm_name, altitude:producer, harvest_year, aroma:quakers) %>% dplyr::group_by(country_of_origin) %>% mutate(avgscore = mean(total_cup_points)) %>% ggplot(., aes(x=aroma, y=avgscore, color = country_of_origin)) + geom_point()
+
+coffee_ratings %>% filter(country_of_origin == "Costa Rica" | country_of_origin == "United States (Hawaii)") %>% select(total_cup_points:farm_name, altitude:producer, harvest_year, aroma:quakers) %>% dplyr::group_by(owner,country_of_origin,region) %>% mutate(avgaroma = mean(aroma), avgflavor = mean(flavor), avgacidity = mean(acidity), avgbody = mean(body), avgtotalscore = mean(total_cup_points)) %>% select(species, owner, country_of_origin, region, avgaroma:avgtotalscore) %>% pivot_longer(avgtotalscore, names_to = "score_type", values_to="average") %>% ggplot(., aes(x=region, y=average, color=country_of_origin)) + geom_point() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+coffee_ratings %>% select(country_of_origin, aroma:sweetness) %>% pivot_longer(aroma:sweetness, names_to = "score_type", values_to="score") %>% dplyr::group_by(country_of_origin, score_type) %>% dplyr::summarise(avgscore= mean(score)) %>% drop_na() %>% filter(avgscore > 9)
+
+ggplot(., aes(x=score_type, y=avgscore, color=country_of_origin)) + geom_bar(stat="identity") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
