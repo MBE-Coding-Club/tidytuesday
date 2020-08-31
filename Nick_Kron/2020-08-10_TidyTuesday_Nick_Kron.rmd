@@ -1,0 +1,134 @@
+---
+title: "Tidy_Tuesday_8/10/2020"
+author: "Nick Kron"
+date: "8/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+library(tidyverse)
+
+```
+
+
+```{r load data}
+avatar <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-11/avatar.csv')
+scene_description <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-11/scene_description.csv')
+```
+
+
+```{r lines per top 10 most chatty characters, fig.width= 6, fig.height= 6}
+avatar %>% 
+  group_by(character) %>% 
+  mutate(lines = n()) %>% 
+  summarise(lines = sum(lines)) %>% 
+  arrange(desc(lines)) %>% 
+  filter(character != "Scene Description") %>%
+  head(n=10) %>%
+  ggplot(data = ., aes(x = character, y = lines)) + geom_bar(stat = "identity")
+```
+
+
+```{r IMDB rating per episode, fig.width= 16, fig.height= 6}
+episode_ratings <- avatar %>% select(book_num, chapter_num,book, chapter, director, imdb_rating) %>%
+  mutate(book_chapter = paste0(book_num, ".", chapter_num)) %>% 
+  unique() %>%
+  arrange(book_num, chapter_num)
+
+episode_ratings$book_chapter <- factor(x = episode_ratings$book_chapter, levels = episode_ratings$book_chapter)
+
+episode_ratings %>% 
+  filter(imdb_rating > 0) %>%
+  ggplot(data =., aes(x = book_chapter, y = imdb_rating, fill = book)) +
+  geom_bar(stat = "identity") +
+  geom_hline(yintercept =  c(
+    mean( (episode_ratings %>% filter(book == "Water" & !is.na(imdb_rating)))$imdb_rating ),
+    mean( (episode_ratings %>% filter(book == "Earth"))$imdb_rating ),
+    mean( (episode_ratings %>% filter(book == "Fire"))$imdb_rating )
+  ),
+  color = "white",
+  size = 2.5
+  ) +
+  geom_hline(yintercept =  c(
+    mean( (episode_ratings %>% filter(book == "Water" & !is.na(imdb_rating)))$imdb_rating ),
+    mean( (episode_ratings %>% filter(book == "Earth"))$imdb_rating ),
+    mean( (episode_ratings %>% filter(book == "Fire"))$imdb_rating )
+  ),
+  color = c(
+      Water = "cornflowerblue",
+      Earth = "darkolivegreen3",
+      Fire = "firebrick"
+    ),
+  size = 1.5
+  ) +
+  theme(
+    axis.text.x = element_text(angle = -90, vjust = 0.25, hjust = 0.5)
+  ) +
+  coord_cartesian(ylim = c(floor(min((episode_ratings %>% filter(!is.na(imdb_rating)))$imdb_rating)) , 10) ) +
+  scale_fill_manual(
+    values = c(
+      Water = "cornflowerblue",
+      Earth = "darkolivegreen3",
+      Fire = "firebrick"
+    )
+  )
+```
+
+
+```{r IMDB rating per episode line, fig.width= 8, fig.height= 6}
+episode_ratings %>% 
+  filter(imdb_rating > 0) %>%
+  ggplot(data =., aes(x = chapter_num, y = imdb_rating, color = book)) +
+  geom_smooth(stat = "identity") +
+  theme(
+    axis.text.x = element_text(angle = -90, vjust = 0.25, hjust = 0.5)
+  ) +
+  coord_cartesian(ylim = c(floor(min((episode_ratings %>% filter(!is.na(imdb_rating)))$imdb_rating)) , 10) ) +
+  scale_color_manual(
+    values = c(
+      Water = "cornflowerblue",
+      Earth = "darkolivegreen3",
+      Fire = "firebrick"
+    )
+  )
+```
+
+
+```{r IMDB rating per episode average trajectory over all seasons, fig.width= 8, fig.height= 6, echo=FALSE,warning=FALSE,message=FALSE}
+episode_ratings %>% 
+  filter(imdb_rating > 0) %>%
+  ggplot(data =., aes(x = chapter_num, y = imdb_rating)) +
+  geom_smooth() +
+  theme(
+    axis.text.x = element_text(angle = -90, vjust = 0.25, hjust = 0.5)
+  ) +
+  coord_cartesian(ylim = c(floor(min((episode_ratings %>% filter(!is.na(imdb_rating)))$imdb_rating)) , 10) )
+
+
+```
+
+
+```{r}
+
+avatar %>% select(book, book_num, chapter, chapter_num, director, imdb_rating) %>%
+  unique() %>%
+  ggplot(data =., aes(x = director, y = imdb_rating, fill = book)) +
+  geom_boxplot()+
+  theme(
+    axis.text.x = element_text(angle = -45, vjust = 0.25, hjust = 0.2)
+  ) +
+  scale_fill_manual(
+    values = c(
+      Water = "cornflowerblue",
+      Earth = "darkolivegreen3",
+      Fire = "firebrick"
+    )
+  )
+
+```
+
