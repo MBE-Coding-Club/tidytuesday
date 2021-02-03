@@ -1,0 +1,47 @@
+---
+title: "tidytuesday"
+author: "Allyson DeMerlis"
+date: "1/25/2021"
+output: html_document
+---
+```{r}
+artwork <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-12/artwork.csv')
+artists <- readr::read_csv("https://github.com/tategallery/collection/raw/master/artist_data.csv")
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+artists %>% 
+  drop_na(gender) %>% 
+  group_by(gender) %>% 
+  summarise(n()) 
+
+artists %>% 
+  drop_na(yearOfBirth) %>% 
+  group_by(yearOfBirth) %>% 
+  mutate(peoplebornperyear = n()) %>% 
+  ggplot(., aes(x=yearOfBirth, y = peoplebornperyear, color = gender)) + geom_point()
+```
+
+```{r}
+length(unique(artwork$artist))
+
+artwork %>% group_by(artist) %>% summarise(numberofartworks = n()) %>% 
+  filter(numberofartworks > 10) %>% 
+  arrange(desc(numberofartworks)) %>% 
+  top_n(numberofartworks, n=10) %>% 
+  filter(!artist == "Turner, Joseph Mallord William") %>%
+  ggplot(., aes(x=artist, y=numberofartworks, fill=artist)) + geom_col() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+  
+
+artwork %>% filter(artist == "Turner, Joseph Mallord William")
+
+length(str_subset(artwork, "satan"))
+```
+
+
