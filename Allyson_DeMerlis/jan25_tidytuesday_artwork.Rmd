@@ -4,22 +4,26 @@ author: "Allyson DeMerlis"
 date: "1/25/2021"
 output: html_document
 ---
+
+Read in files
 ```{r}
 artwork <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-12/artwork.csv')
 artists <- readr::read_csv("https://github.com/tategallery/collection/raw/master/artist_data.csv")
 ```
-
+load packages
 ```{r}
 library(tidyverse)
 ```
-
-
+data exploration
 ```{r}
 artists %>% 
   drop_na(gender) %>% 
   group_by(gender) %>% 
   summarise(n()) 
+```
 
+Birth year and gender of artists in Tate museum over time
+```{r}
 artists %>% 
   drop_na(yearOfBirth) %>% 
   group_by(yearOfBirth) %>% 
@@ -27,6 +31,7 @@ artists %>%
   ggplot(., aes(x=yearOfBirth, y = peoplebornperyear, color = gender)) + geom_point()
 ```
 
+most productive artists represented in the Tate museum
 ```{r}
 length(unique(artwork$artist))
 
@@ -40,8 +45,6 @@ artwork %>% group_by(artist) %>% summarise(numberofartworks = n()) %>%
   
 
 artwork %>% filter(artist == "Turner, Joseph Mallord William")
-
-length(str_subset(artwork, "satan"))
 ```
 
 
