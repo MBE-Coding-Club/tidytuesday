@@ -1,0 +1,63 @@
+---
+title: "astronauts"
+author: "allyson_demerlis"
+date: "7/20/2020"
+output: html_document
+---
+
+import data
+```{r}
+astronauts <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-14/astronauts.csv')
+library(tidyverse)
+```
+
+
+male vs. female
+```{r}
+astronauts %>% dplyr::group_by(sex,nationality) %>% summarise(count = n()) %>% 
+  filter(count > 5) %>% 
+  ggplot(., aes(x=nationality, y=count, fill=sex)) + geom_bar(stat="identity", position = position_dodge()) + 
+  theme_classic() + labs(title="greater than 5 astronauts per sex")
+
+
+astronauts %>% dplyr::group_by(sex,nationality) %>% summarise(count = n()) %>% 
+  filter(sex=="female") %>% 
+  ggplot(., aes(x=nationality, y=count, fill=sex)) + geom_bar(stat="identity", position = position_dodge()) +
+  theme_classic() + labs(title = "Female astronauts per country")
+```
+
+
+gender over time
+```{r}
+
+astronauts %>% dplyr::group_by(sex,nationality,year_of_mission) %>% summarise(count = n()) %>% 
+  filter(nationality == "U.S.") %>% 
+  ggplot(., aes(x=year_of_mission, y=count, fill=sex)) + geom_bar(stat="identity", position=position_dodge()) +
+  scale_y_continuous(expand = c(0.005, 0.005)) +
+  theme_classic() +
+  labs(x = "Year of Mission")
+
+astronauts %>% select(id, sex, year_of_birth, nationality, total_number_of_missions, year_of_mission, total_hrs_sum) %>% 
+  dplyr::group_by(sex, year_of_mission) %>% mutate(avg_hrs_in_space_per_sex_per_year = mean(total_hrs_sum)) %>% 
+  ggplot(., aes(x=year_of_mission, y=avg_hrs_in_space_per_sex_per_year, color=sex)) + geom_point() +
+  scale_y_continuous(expand = c(0.005, 0.005)) + 
+  labs(x="Year of Mission", y ="Avg Hrs in Space per Year") + theme_classic()
+
+astronauts %>% select(id, sex, year_of_birth, nationality, total_number_of_missions, year_of_mission, total_hrs_sum) %>% 
+  dplyr::group_by(sex, year_of_mission) %>% mutate(avg_hrs_in_space_per_sex_per_year = mean(total_hrs_sum)) %>% arrange(desc(avg_hrs_in_space_per_sex_per_year))
+#2016 mission for females
+
+astronauts %>% filter(year_of_mission == "2016") %>% ggplot(., aes(x=name, y=hours_mission, fill=sex)) + geom_bar(stat="identity") +
+  theme_classic() + theme(axis.text.x = element_text(angle = 90))
+
+astronauts %>% select(id, sex, year_of_birth, nationality, total_number_of_missions, year_of_mission, total_hrs_sum) %>% 
+  group_by(sex, nationality, year_of_mission) %>% 
+  summarise(avg_hrs = mean(total_hrs_sum), n = n()) %>% filter(sex == "female") %>% 
+  ggplot(., aes(x=year_of_mission, y=avg_hrs, color=nationality)) + geom_line()
+  
+  
+  mutate(nationality = fct_reorder(nationality, -total_hrs_sum)) %>% filter()
+  ggplot(., aes(x=nationality, y = ))
+
+```
+

@@ -1,0 +1,48 @@
+## Washington Trails
+
+Load in the data and prep it for analysis.  
+```{r}
+hike_data <- readr::read_rds(url('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-11-24/hike_data.rds'))
+
+library(tidyverse)
+```
+
+
+See if the word "forest", "lake", and "mountain" comes up in a lot of park descriptions.  
+```{r}
+
+tl_forest <- length(hike_data$description[grep("forest", hike_data$description, ignore.case = TRUE)])
+
+tl_lake <- length(hike_data$description[grep("lake", hike_data$description, ignore.case = TRUE)])
+
+tl_mountain  <- length(hike_data$description[grep("mountain", hike_data$description, ignore.case = TRUE)])
+
+```
+
+Compare the description #'s to the feature #'s
+```{r}
+
+tl_forest2 <- length(hike_data$features[grep("forest", hike_data$features, ignore.case = TRUE)])
+
+tl_lake2 <- length(hike_data$features[grep("lake", hike_data$features, ignore.case = TRUE)])
+
+tl_mountain2  <- length(hike_data$features[grep("mountain", hike_data$features, ignore.case = TRUE)])
+
+```
+
+Let's make a plot to demonstrate the trends...
+```{r}
+type <- c("description","description","description","feature","feature","feature")
+name <- c("forest","lake","mountain","forest","lake","mountain")
+tl <- c(tl_forest, tl_lake, tl_mountain, tl_forest2, tl_lake2, tl_mountain2)
+
+df <- data.frame(type, name, tl)
+
+ggplot(df, aes(x = name, y = tl, fill = type)) + geom_bar(stat = "identity", position=position_dodge())+ xlab("Key Word") + ylab ("Total Count of Trails") + ggtitle("Mentions of Keywords in Description vs. Feature List") +theme_bw() + scale_fill_manual(values = c("#317844", "#70a17d")) +
+theme(panel.background = element_rect(fill="#c2bba9"), 
+      panel.grid.major = element_line(colour="#b3a99b"),
+      panel.grid.minor = element_line(colour ="#b3a99b"))+
+theme(axis.text.x=element_text(colour="#5e5951"),axis.text.y=element_text(colour="#5e5951"),axis.title.x = element_text(colour = "#5e5951"),axis.title.y = element_text(colour = "#5e5951"), plot.title = element_text(face = "bold", color = "#5e5951"))
+
+```
+Conclusion...  all of these words come up in the descriptions about the same amount of times, but they don't serve as features

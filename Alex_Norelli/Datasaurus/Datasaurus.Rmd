@@ -1,0 +1,74 @@
+---
+title: "Datasaurus"
+author: "Alex Norelli"
+date: "10/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+dino <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-10-13/datasaurus.csv')
+```
+
+## Datasaurus
+
+The goal of this exercise is to present the data in different forms.  
+
+```{r}
+plot(dino$x, dino$y)
+
+ggplot(dino, aes(x=x, y=y, colour=dataset))+
+  geom_point()+
+  theme_void()+
+  theme(legend.position = "none")+
+  facet_wrap(~dataset, ncol=3)
+```
+
+## Testing Plots
+
+```{r}
+ggplot(dino, aes(x=x, colour=dataset))+
+  geom_bar()+
+  theme_void()+
+  theme(legend.position = "none")+
+  facet_wrap(~dataset, ncol=3)
+
+ggplot(dino, aes(x=x, y=y, colour=dataset))+
+  geom_path()+
+  theme_void()+
+  theme(legend.position = "none")+
+  facet_wrap(~dataset, ncol=3)
+
+ggplot(dino, aes(x=x, colour=dataset))+
+  geom_boxplot()+
+  theme_void()+
+  theme(legend.position = "none")+
+  facet_wrap(~dataset, ncol=3)
+
+ggplot(dino, aes(x=x, fill=dataset))+
+  geom_histogram()+
+  theme_void()+
+  theme(legend.position = "none")+
+  facet_wrap(~dataset, ncol=3)
+
+ggplot(dino, aes(x=x, fill=dataset))+
+  geom_histogram(binwidth = 5)+
+  theme_void()+
+  theme(legend.position = "none")+
+  facet_wrap(~dataset, ncol=3)
+
+ggplot(dino, aes(x=x, fill=dataset))+
+  geom_histogram(binwidth = 20)+
+  theme_void()+
+  theme(legend.position = "none")+
+  facet_wrap(~dataset, ncol=3)
+```
+```{r}
+star <- filter(dino, dataset == "star") 
+circle <- filter(dino, dataset == "circle")
+dinosaur <- filter(dino, dataset == "dino")
+
+summary(star)
+summary(circle)
+summary(dinosaur)
+```

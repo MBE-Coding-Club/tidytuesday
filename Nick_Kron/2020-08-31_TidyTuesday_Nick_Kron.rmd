@@ -1,0 +1,89 @@
+---
+title: "TidyTuesday_8-31-2020-Kron"
+author: "Nick Kron"
+date: "8/31/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE,echo=FALSE,error=FALSE}
+library(tidyr)
+library(tibble)
+library(e1071)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+
+key_crop_yields <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-09-01/key_crop_yields.csv')
+fertilizer <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-09-01/cereal_crop_yield_vs_fertilizer_application.csv')
+tractors <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/cereal_yields_vs_tractor_inputs_in_agriculture.csv')
+land_use <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-09-01/land_use_vs_yield_change_in_cereal_production.csv')
+arable_land <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-09-01/arable_land_pin.csv')
+
+
+```
+
+```{r, fig.width=12}
+
+
+arable_wide <- arable_land %>% 
+  as.data.frame() %>% 
+  dplyr::rename(arable = `Arable land needed to produce a fixed quantity of crops ((1.0 = 1961))`) %>%
+  pivot_wider(data = ., id_cols = c(Code,Entity), names_from = Year, values_from = arable)
+
+df <- arable_wide %>% 
+  dplyr::filter(! is.na(Code) ) %>% 
+  dplyr::select(-Code) %>% 
+  column_to_rownames("Entity") %>%
+  drop_na()
+
+
+fuzzyc <- cmeans(
+  df %>% t() %>% scale() %>% t(), 
+  4,  
+  iter.max = 100, 
+  dist = "euclidean", m = 2)
+
+fuzzyc$centers %>% 
+  as.data.frame() %>% 
+  rownames_to_column("cluster") %>% 
+  pivot_longer(., cols = -cluster, names_to = "year", values_to = "val")
+
+plot_df <- fuzzyc$cluster  %>%
+  as.data.frame() %>%
+  rownames_to_column('Entity') %>%
+  dplyr::rename(.data = ., cluster = `.`) %>%
+  mutate_at(., vars(cluster),
+            list(as.character)) %>%
+  inner_join(., df %>% t() %>% scale() %>% t() %>% as.data.frame() %>% rownames_to_column("Entity") %>% pivot_longer(. , cols = -Entity, names_to = "year", values_to = "val")
+             )
+plot_df %>% ggplot(data =., aes(x = year , y = val, group = Entity)) + geom_line( color = "grey") + facet_wrap(facets = "cluster") +
+  geom_smooth(data = fuzzyc$centers %>% 
+  as.data.frame() %>% 
+  rownames_to_column("cluster") %>% 
+  pivot_longer(., cols = -cluster, names_to = "year", values_to = "val") %>%
+    mutate(Entity = "Cluster"),
+  aes(x = year, y = val, color = cluster), se = TRUE) +
+  labs( x = "Year", y = "Scaled Arable land needed to produce a fixed quantity of crops") +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = -90, hjust = 0, vjust = 0)
+  )
+
+
+fuzzyc$cluster  %>%
+  as.data.frame() %>%
+  rownames_to_column('Entity') %>%
+  dplyr::rename(.data = ., cluster = `.`) %>%
+  mutate_at(., vars(cluster),
+            list(as.character)) %>%
+  filter(cluster == 4) 
+
+
+```
+

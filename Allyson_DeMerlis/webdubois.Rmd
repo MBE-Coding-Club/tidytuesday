@@ -1,0 +1,38 @@
+---
+title: "webdubois"
+author: "Allyson DeMerlis"
+date: "2/22/2021"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+```
+
+Tidy Tuesday dataset
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2021-02-16')
+
+income <- tuesdata$income
+census <- tuesdata$census
+georgia_pop <- tuesdata$georgia_pop
+```
+
+Exploring Income Dataset
+```{r}
+income %>% 
+  gather(Rent:Other, key = "Category", value = "Percentage") %>% 
+  mutate(Category = fct_relevel(Category, 
+            "Other", "Tax", "Clothes", "Food", "Rent")) %>% 
+  ggplot(., aes(x=rev(Class), y = Percentage, fill = Category)) + 
+  geom_col() + 
+  theme_bw() + 
+  labs(x = "Income Bracket", y = "Percent of Annual Expenditure", title = "Income and Expenditure of 150 Black Families in Atlanta, GA, 1900.", caption = "Based on data from W.E.B. DuBois 1900 Paris Exposition.") + 
+  coord_flip() +
+  scale_fill_manual(values = c("grey", "lightblue", "pink", "purple", "black")) +
+  geom_text(aes(label = paste0(Percentage, "%")), size = 3, hjust = 1.6, position = "stack", color = "white") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+ggsave("income_webdubois.png", width = 7, height = 5)
+
+```
+
