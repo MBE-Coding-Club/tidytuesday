@@ -1,0 +1,56 @@
+---
+title: "Super Bowl Ads"
+author: "Alex Norelli"
+date: "3/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Woooo Superbowllll!!!!  
+
+I love watching the Superbowl and I especially love watching the ads!  One of my favorite things to do while watching is rate the ads and keep track of all time favorites.  
+
+```{r, echo = FALSE, message=FALSE}
+library(tidyverse)
+
+youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv')
+
+```
+
+## Bud Light and the Bud Knight
+
+I've been fascinated by bud light's commercials for years.  This year, their commercial brought back popular characters from their previous commercials including, Bud Knight.  Bud Knight appeared in 2017 with the famous catch phrase "Dilly Dilly" in the commercial series by tide called "The Banquet".  
+
+In 2019 the Bud Light commercial campaign hit it's peak with the Game of Thrones crossover with a few other beer companies where the Bud Knight's head ends up getting brutally crushed by rocks.  
+
+Interesting note: there is no Budlight commercial for 2017 in this dataset, that is the same year the Bud Knight was started and was featured in a tide commercial.  
+
+Another interesting note: Budwieser actually did not like the brutal death of their character!  But HBO was calling the shots!
+
+
+```{r, echo=FALSE}
+bl <- filter(youtube, brand == "Bud Light")
+bl$ldl <- bl$like_count/bl$dislike_count
+
+ggplot(bl, aes(year))+geom_bar()+
+  ggtitle("Number of Bud Light Commercials Each Super Bowl")+
+  xlab("Year")+ ylab("Number of Commercials")
+
+ggplot(bl, aes(year, view_count, fill = funny))+geom_bar(stat = "identity")+
+  ggtitle("Number of Views on Bud Light Commercials Each Super Bowl")+
+  xlab("Year")+ ylab("Number of Views")
+
+ggplot(bl, aes(year, ldl))+geom_bar(stat = "summary", fun ="mean")+
+  ggtitle("The Like:Dislike Ratios on Bud Light Commercials Each Super Bowl")+
+  xlab("Year")+ ylab("Like:Dislike Ratio")
+
+
+```
+
+```{r}
+test <- filter(youtube, year == 2017)
+
+```

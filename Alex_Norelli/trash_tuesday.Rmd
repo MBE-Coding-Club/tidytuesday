@@ -1,0 +1,52 @@
+---
+title: "Trash Tuesday"
+author: "Alex Norelli"
+date: "2/1/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Trash Stats
+
+Let's see what we can do with data about plastics.  
+
+```{r, include = FALSE, echo = FALSE}
+plastics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-26/plastics.csv')
+
+```
+
+## Let's try Pepsi vs. Coke
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+
+coke <- plastics %>% filter(parent_company == "The Coca-Cola Company")
+pepsi <- plastics %>% filter(parent_company == "PepsiCo")
+
+both  <- rbind(coke, pepsi)
+
+both[is.na(both)] <- 0
+
+hdpe<- both %>% group_by(parent_company) %>% summarise(hdpe = sum(hdpe))
+ldpe<- both %>% group_by(parent_company) %>% summarise(ldpe = sum(ldpe))
+o<- both %>% group_by(parent_company) %>% summarise(o = sum(o))
+pet<- both %>% group_by(parent_company) %>% summarise(pet = sum(pet))
+pp<- both %>% group_by(parent_company) %>% summarise(pp = sum(pp))
+ps<- both %>% group_by(parent_company) %>% summarise(ps = sum(ps))
+pvc<- both %>% group_by(parent_company) %>% summarise(pvc = sum(pvc))
+gt <- both %>% group_by(parent_company) %>% summarise(grand_total = sum(grand_total))
+
+test <- data_frame(a = hdpe$parent_company, hdpe = hdpe$hdpe, ldpe = ldpe$ldpe, o = o$o, pet = pet$pet, pp= pp$pp, ps = ps$ps, pvc = pvc$pvc, gt = gt$grand_total)
+
+pls <- test %>% pivot_longer(!a, names_to = "type", values_to = "count")
+
+ggplot(pls, aes(type, count)) + geom_bar(stat = "identity", aes(fill = a), position = "dodge") +
+  xlab("Plastic Type") + ylab("Count") + ggtitle("Pepsi Vs. Coke: Who's plastic is present?")
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
