@@ -14,13 +14,12 @@ artists <- readr::read_csv("https://github.com/tategallery/collection/raw/master
 ```{r, message = FALSE}
 library(tidyverse)
 ```
-
-
+data exploration
 ```{r}
-artists %>% 
-  drop_na(yearOfBirth) %>% 
-  group_by(yearOfBirth) %>% 
-  mutate(peoplebornperyear = n()) %>% 
+artists %>%
+  drop_na(yearOfBirth) %>%
+  group_by(yearOfBirth) %>%
+  mutate(peoplebornperyear = n()) %>%
   ggplot(., aes(x=yearOfBirth, y = peoplebornperyear, color = gender)) + geom_point() +
   theme_classic() +
   labs(x="Birth Year", y="Number of People", color = "Gender")
@@ -28,22 +27,21 @@ artists %>%
 #ggsave("birthyear_artists.png", height = 2, width=2)
 ```
 
+most productive artists represented in the Tate museum
 ```{r}
 #length(unique(artwork$artist))
 
-artwork %>% group_by(artist) %>% summarise(numberofartworks = n()) %>% 
-  filter(numberofartworks > 10) %>% 
-  arrange(desc(numberofartworks)) %>% 
-  top_n(numberofartworks, n=10) %>% 
+artwork %>% group_by(artist) %>% summarise(numberofartworks = n()) %>%
+  filter(numberofartworks > 10) %>%
+  arrange(desc(numberofartworks)) %>%
+  top_n(numberofartworks, n=10) %>%
   filter(!artist == "Turner, Joseph Mallord William") %>%
   ggplot(., aes(x=artist, y=numberofartworks, fill=artist)) + geom_col() +
   theme_classic()  +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
   scale_fill_brewer(palette = 4) +
   labs(x = "Artist", y="Number of Artworks in Museum") +
-  theme(legend.position = "none") 
-  
+  theme(legend.position = "none")
+
 #ggsave("top_artists.png", height = 2, width = 2)
 ```
-
-

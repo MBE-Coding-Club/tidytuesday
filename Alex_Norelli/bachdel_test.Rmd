@@ -1,0 +1,67 @@
+---
+title: "Bachdel Test"
+author: "Alex Norelli"
+date: "3/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The Bachdel Test
+
+The Bachdel test examines 3 criteria: 
+  1. At least 2 named women characters
+  2. They have a conversation at some point
+  3. The conversation isn't about a male character
+
+```{r include = FALSE, echo = FALSE}
+library(tidyverse)
+
+movies <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-09/movies.csv')
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r echo=FALSE}
+
+
+movies$rated <- case_when(
+  movies$rated == "N/A" ~ "NA",
+  movies$rated == "Not Rated" ~ "NA",
+  movies$rated == "Unrated" ~ "NA",
+  movies$rated == "Not Rated" ~ "NA",
+  movies$rated == NA ~ "NA",
+  TRUE ~ as.character(movies$rated)
+)
+movies$rated <- na_if(movies$rated, "NA")
+
+movies$rated <- case_when(
+  movies$rated == "TV-14" ~ "TV",
+  movies$rated == "TV-PG" ~ "TV",
+  TRUE ~ as.character(movies$rated)
+)
+
+movies$clean_test <- case_when(
+  movies$clean_test == "dubious" ~ "Unclear",
+  movies$clean_test == "men" ~ "Talked about men (-1)",
+  movies$clean_test == "notalk" ~ "2 women no talking (-2)",
+  movies$clean_test == "nowomen" ~ "No Women (-3)",
+  movies$clean_test == "ok" ~ "Passed",
+  TRUE ~ as.character(movies$clean_test)
+)
+
+movies$clean_test <- factor(movies$clean_test, levels = c("Passed", "Talked about men (-1)", "2 women no talking (-2)", "No Women (-3)", "Unclear"))
+
+ggplot(movies, aes(year))+geom_bar(aes(fill = rated))
+ggplot(movies, aes(clean_test))+geom_bar(aes(fill = rated))
+ggplot(movies, aes(rated))+geom_bar(aes(fill = clean_test))
+ggplot(movies, aes(rated))+geom_bar(aes(fill = clean_test), position = "fill")
+
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

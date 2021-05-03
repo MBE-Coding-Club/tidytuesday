@@ -1,0 +1,45 @@
+---
+title: "income_distribution"
+author: "Alex Norelli"
+date: "2/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(tidyverse)
+income_distribution <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_distribution.csv')
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r }
+
+test <- filter(income_distribution, income_bracket == "Under $15,000")
+test2 <- filter(test, race == "All Races")
+test3 <- filter(income_distribution, income_bracket == "$200,000 and over")
+test4 <- filter(test3, race == "All Races")
+
+t <- rbind(test2, test4)
+
+ggplot(t, aes(year, income_distribution))+geom_line(aes(color = income_bracket)) +
+  xlab("year") + ylab("% of overall income controlled") + ggtitle("The change of wealth distribution over time")
+
+i_d <- filter(income_distribution, income_bracket %in% c("$200,000 and over", "Under $15,000"))
+
+ggplot(i_d, aes(year, income_distribution)) + geom_point(aes(color = income_bracket)) #+ facet_grid(aes(race))
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
