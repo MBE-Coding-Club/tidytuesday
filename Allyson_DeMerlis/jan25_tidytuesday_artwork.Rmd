@@ -2,33 +2,34 @@
 title: "tidytuesday"
 author: "Allyson DeMerlis"
 date: "1/25/2021"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
-```{r}
+```{r, message = FALSE}
 artwork <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-12/artwork.csv')
 artists <- readr::read_csv("https://github.com/tategallery/collection/raw/master/artist_data.csv")
 ```
 
-```{r}
+```{r, message = FALSE}
 library(tidyverse)
 ```
 
 
 ```{r}
 artists %>% 
-  drop_na(gender) %>% 
-  group_by(gender) %>% 
-  summarise(n()) 
-
-artists %>% 
   drop_na(yearOfBirth) %>% 
   group_by(yearOfBirth) %>% 
   mutate(peoplebornperyear = n()) %>% 
-  ggplot(., aes(x=yearOfBirth, y = peoplebornperyear, color = gender)) + geom_point()
+  ggplot(., aes(x=yearOfBirth, y = peoplebornperyear, color = gender)) + geom_point() +
+  theme_classic() +
+  labs(x="Birth Year", y="Number of People", color = "Gender")
+
+#ggsave("birthyear_artists.png", height = 2, width=2)
 ```
 
 ```{r}
-length(unique(artwork$artist))
+#length(unique(artwork$artist))
 
 artwork %>% group_by(artist) %>% summarise(numberofartworks = n()) %>% 
   filter(numberofartworks > 10) %>% 
@@ -36,12 +37,13 @@ artwork %>% group_by(artist) %>% summarise(numberofartworks = n()) %>%
   top_n(numberofartworks, n=10) %>% 
   filter(!artist == "Turner, Joseph Mallord William") %>%
   ggplot(., aes(x=artist, y=numberofartworks, fill=artist)) + geom_col() +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+  theme_classic()  +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  scale_fill_brewer(palette = 4) +
+  labs(x = "Artist", y="Number of Artworks in Museum") +
+  theme(legend.position = "none") 
   
-
-artwork %>% filter(artist == "Turner, Joseph Mallord William")
-
-length(str_subset(artwork, "satan"))
+#ggsave("top_artists.png", height = 2, width = 2)
 ```
 
 

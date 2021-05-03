@@ -1,0 +1,62 @@
+---
+title: "UNvotes"
+author: "Allyson DeMerlis"
+date: "3/22/2021"
+output: html_document
+---
+
+```{r}
+library(tidytuesdayR)
+library(tidyverse)
+tuesdata <- tidytuesdayR::tt_load('2021-03-23')
+unvotes <- tuesdata$unvotes
+un_roll_calls <- tuesdata$roll_calls
+issues <- tuesdata$issues
+```
+
+This dataset provides the voting history of countries in the United Nations General Assembly, along with information such as date, description, and topics for each vote. 
+http://www.citizen-statistician.org/2021/03/open-source-contribution-as-a-student-project/
+
+```{r}
+unvotes %>%
+  inner_join(un_roll_calls, by = "rcid") %>%  #roll call ID
+  group_by(year = lubridate::year(date), country) %>%
+  summarize(votes = n(),
+            percent_yes = mean(vote == "yes"))
+
+#this is showing the proportion of countries who votes yes per year
+
+```
+
+```{r}
+unvotes %>%
+  inner_join(un_roll_calls, by = "rcid") %>%
+  inner_join(issues, by = "rcid") %>% 
+  distinct(issue)
+```
+```{r}
+unvotes %>%
+  inner_join(un_roll_calls, by = "rcid") %>%
+  inner_join(issues, by = "rcid") %>% 
+  filter(country == "United States") %>% 
+  group_by(year = lubridate::year(date), issue) %>% 
+  summarize(votes = n(),
+            percent_yes = mean(vote == "yes")) %>% 
+  filter(votes > 5) %>% 
+  ggplot(aes(year, percent_yes)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~ issue)
+```
+
+```{r}
+unvotes %>%
+  inner_join(un_roll_calls, by = "rcid") %>%
+  inner_join(issues, by = "rcid") %>% 
+  filter(importantvote == 1) %>% 
+  group_by(year = lubridate::year(date), country) %>%
+  summarize(votes = n(),
+            percent_yes = mean(vote == "yes")) %>% 
+  ggplot(., aes(x=year, y=percent_yes)) + geom_point()
+```
+
